@@ -1,13 +1,13 @@
 package blockchain
 
 import (
+	"github.com/boltdb/bolt"
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/hex"
 	"fmt"
-	"github.com/boltdb/bolt"
 	"log"
 	"math/big"
 	"time"
@@ -84,19 +84,18 @@ func (blockchain *Blockchain) FindUnspentTransactions(address string) []Transact
 		for _, tx := range block.Transactions {
 			txId := hex.EncodeToString(tx.Id)
 		Outputs:
-			for value, scriptPubKey := range tx.Vout {
+			for index, txOut := range tx.Vout {
 				// Was output spent
 				if spentTxOutputs[txId] != nil {
 					for _, spentOut := range spentTxOutputs[txId] {
 						//
-						if spentOut == value {
+						if spentOut == index {
 							continue Outputs
 						}
 					}
 				}
-				if scriptPubKey.CanBeUnlockedWith(address) {
+				if txOut.CanBeUnlockedWith(address) {
 					unspentTransactions = append(unspentTransactions, *tx)
-					fmt.Printf("%s\n", unspentTransactions)
 				}
 			}
 			if !tx.IsBaseTransaction() {
@@ -123,18 +122,16 @@ func (blockchain *Blockchain) FindUnspentTransactionOutputs(address string) []Tx
 	for _, tx := range unspentTransactions {
 		for _, out := range tx.Vout {
 			if out.CanBeUnlockedWith(address) {
-				unspentTransactionOutputs = append(unspentTransactionOutputs)
+				unspentTransactionOutputs = append(unspentTransactionOutputs, out)
 			}
 		}
 	}
-	fmt.Printf("%s\n", unspentTransactionOutputs)
 	return unspentTransactionOutputs
 }
 
 func (blockchain *Blockchain) Balance(address string) int {
 	balance := 0
 	unspentTransactionOutputs := blockchain.FindUnspentTransactionOutputs(address)
-
 	for _, out := range unspentTransactionOutputs {
 		balance += out.Value
 	}

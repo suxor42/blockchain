@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./cli"
+	"github.com/suxor42/blockchain/cli"
 )
 
 func main() {

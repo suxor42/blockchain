@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"../blockchain"
+	"github.com/suxor42/blockchain/blockchain"
 )
 
 func (cli *CLI) printUsage() {
